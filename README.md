@@ -1,2 +1,2 @@
-# docker-mgo
-docker mongo go
+# docker-go-mongo
+docker go mogo
