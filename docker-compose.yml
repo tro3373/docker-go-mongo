@@ -1,0 +1,55 @@
+version: '3.7'
+services:
+  mongo001:
+    image: mongo:3.2.21
+    build:
+      context: ./mongo/3.2
+    container_name: mongo001
+    # restart: always
+    environment:
+      - TZ=Asia/Tokyo
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: root
+    ports:
+      - 27017:27017
+    # links:
+    #   - mongo002:mongo002
+    #   - mongo003:mongo003
+    volumes:
+      - ./mongo-data/001:/data/db
+      - ./scripts:/scripts
+    command: mongod --replSet rs1 --noprealloc --smallfiles
+  mongo002:
+    image: mongo:3.2.21
+    container_name: mongo002
+    environment:
+      - TZ=Asia/Tokyo
+    ports:
+      - 27018:27017
+    # links:
+    #   - mongo001:mongo001
+    #   - mongo003:mongo003
+    volumes:
+      - ./mongo-data/002:/data/db
+    command: mongod --replSet rs1 --noprealloc --smallfiles
+  mongo003:
+    image: mongo:3.2.21
+    container_name: mongo003
+    environment:
+      - TZ=Asia/Tokyo
+    ports:
+      - 27019:27017
+    # links:
+    #   - mongo001:mongo001
+    #   - mongo002:mongo002
+    volumes:
+      - ./mongo-data/003:/data/db
+    command: mongod --replSet rs1 --noprealloc --smallfiles
+  # mongo-express:
+  #   image: mongo-express
+  #   restart: always
+  #   ports:
+  #     - 8081:8081
+  #   environment:
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: root
