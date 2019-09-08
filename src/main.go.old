@@ -1,0 +1,84 @@
+package main
+
+import (
+    "fmt"
+    "log"
+
+    "github.com/globalsign/mgo"
+    "github.com/globalsign/mgo/bson"
+)
+
+type Person struct {
+    ID   bson.ObjectId `bson:"_id"`
+    Name string        `bson:"name"`
+    Age  int           `bson:"age"`
+}
+
+func ini(db *mgo.Database) {
+
+    ritsu := &Person{
+        ID:   bson.NewObjectId(),
+        Name: "田井中律",
+        Age:  19,
+    }
+    col := db.C("people")
+    if err := col.Insert(ritsu); err != nil {
+        log.Fatalln(err)
+    }
+
+    p := new(Person)
+    query := db.C("people").Find(bson.M{})
+    query.One(&p)
+
+    fmt.Printf("%+v\n", p)
+    // &{ID:ObjectIdHex("5478517a9871b9b8e42e2ee2") Name:田井中律 Age:17}
+}
+
+func test(db *mgo.Database, i int) {
+
+    pipeline := []bson.M{
+        {
+            "$group": bson.M{
+                "_id": "",
+                "max": bson.M{"$max": "$Age"},
+            },
+        },
+    }
+    result := []bson.M{}
+    db.C("people").Pipe(pipeline).All(&result)
+    // return result[0]["max"].(float64), nil
+    fmt.Println(result[0]["max"].(float64))
+
+    // fmt.Printf("%+v\n", p)
+    // fmt.Printf("> Max %d\n", p.Age)
+
+    // ritsu := &Person{
+    //     ID:   bson.NewObjectId(),
+    //     Name: "田井中律",
+    //     Age:  p.Age,
+    // }
+
+    // p.ID = bson.NewObjectId()
+    // p.Age++
+    // col := db.C("people")
+    // if err := col.Insert(p); err != nil {
+    //     log.Fatalln(err)
+    // }
+
+}
+
+func main() {
+    session, _ := mgo.Dial("mongodb://localhost/test")
+    defer session.Close()
+    db := session.DB("test")
+
+    // ini(db)
+    test(db, 1)
+    // for i :=0 ;; {
+    //     i++
+    //     test(db, i)
+    //     if i > 1 {
+    //         break
+    //     }
+    // }
+}
